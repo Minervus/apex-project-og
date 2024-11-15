@@ -71,7 +71,12 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
 const PlayerTable: React.FC = () => {
   const { players, loading, error } = usePlayers();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-
+  console.log('🎯 PlayerTable render:', { 
+    playersCount: players?.length, 
+    loading, 
+    error,
+    players 
+  });
     // Handle closing the profile modal
   const handleClose = () => {
     setSelectedPlayer(null);
@@ -125,7 +130,26 @@ const PlayerTable: React.FC = () => {
     <>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
-          {/* ... existing thead content ... */}
+          <tr>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Player
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Primary Position
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Secondary Position
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Rating
+            </th>
+            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Details
+            </th>
+          </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {players.map((player) => (
@@ -137,6 +161,7 @@ const PlayerTable: React.FC = () => {
           ))}
         </tbody>
       </table>
+
 
       {/* Player Profile Modal */}
       {selectedPlayer && (
