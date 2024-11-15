@@ -27,4 +27,3 @@ dist-ssr
 firebase.json
 firebase.rules
 firebase.debug.json 
-firebase.ts
