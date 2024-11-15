@@ -13,6 +13,7 @@ interface PlayerTableHeaderProps {
 
 const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({ sortConfig, onSort }) => {
   const headers = [
+    { key: 'ageGroup', label: 'Age Group' },
     { key: 'name', label: 'Player' },
     { key: 'primaryPosition', label: 'Primary Position' },
     { key: 'secondaryPosition', label: 'Secondary Position' },

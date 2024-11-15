@@ -4,9 +4,9 @@ import { usePlayers } from '../hooks/useFirestore';
 import CoachPlayerTableHeader from '../components/CoachPlayerTableHeader';
 import CoachPlayerTableRow from '../components/CoachPlayerTableRow';
 import type { Player } from '../types/player';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase.ts/'; // Adjust this import path based on your firebase config location
-
+import { auth } from '../lib/firebase'; 
 
 interface Assessment {
   rating: number;
@@ -81,7 +81,7 @@ const CoachDashboard = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlayer) return;
+    if (!selectedPlayer || !auth.currentUser) return;
 
     try {
       const sectionAverages = {
@@ -90,11 +90,25 @@ const CoachDashboard = () => {
         servingAverage: calculateSectionAverage('Serving'),
         defenseAverage: calculateSectionAverage('Defense')
       };
+      
+      const newAssessment = {
+        date: new Date(),
+        status: status,
+        notes: notes,
+        overallRating: calculateOverallRating(),
+        categoryAverages: {
+          ballControl: calculateSectionAverage('Ball Control'),
+          attacking: calculateSectionAverage('Attacking'),
+          serving: calculateSectionAverage('Serving'),
+          defense: calculateSectionAverage('Defense')
+        },
+        assessedBy: auth.currentUser.email
+      };
 
       const playerRef = doc(db, 'players', selectedPlayer.id);
       await updateDoc(playerRef, {
         status: status,
-        assessments: assessments,
+        assessments: arrayUnion(newAssessment),
         notes: notes,
         overallRating: calculateOverallRating(),
         ...sectionAverages

@@ -6,6 +6,7 @@ import PlayerProfile from './PlayerProfile';
 
 interface PlayerTableRowProps {
   player: Player;
+  players: Player[];
   onClick: (player: Player) => void;
 }
 
@@ -28,6 +29,11 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
       className="hover:bg-gray-50 transition-colors cursor-pointer"
       onClick={() => onClick(player)}
     >
+        <td className="px-6 py-4 whitespace-nowrap">
+        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+          {player.primaryPosition}
+        </span>
+      </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="h-10 w-10 flex-shrink-0">
@@ -68,7 +74,7 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
   );
 };
 
-const PlayerTable: React.FC = () => {
+const PlayerTable: React.FC = ({}) => {
   const { players, loading, error } = usePlayers();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   console.log('🎯 PlayerTable render:', { 
@@ -128,6 +134,7 @@ const PlayerTable: React.FC = () => {
 
   return (
     <>
+      
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

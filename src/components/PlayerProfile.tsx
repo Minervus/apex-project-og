@@ -120,6 +120,33 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
     }
   };
 
+  const getRatingColor = (rating: number) => {
+    if (rating >= 4) return 'bg-green-500';
+    if (rating >= 3) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+  
+  const RatingBar: React.FC<{ rating: string | undefined; label: string }> = ({ rating, label }) => {
+    const numericRating = rating ? parseFloat(rating) : 0;
+    const percentage = (numericRating / 5) * 100;
+    
+    return (
+      <div className="space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-700">{label}</span>
+          <span className="text-sm font-medium text-gray-900">{rating || 'N/A'}</span>
+        </div>
+        <div className="h-2 w-full bg-gray-200 rounded-full">
+          <div
+            className={`h-2 rounded-full ${getRatingColor(numericRating)} transition-all duration-300`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -381,21 +408,18 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium mb-3">Average Ratings</h4>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Ball Control</p>
-                      <p className="font-medium">{player.ballControlAverage || 'N/A'}</p>
+                  <div className="space-y-4">
+                    <RatingBar rating={player.ballControlAverage} label="Ball Control" />
+                    <RatingBar rating={player.attackingAverage} label="Attacking" />
+                    <RatingBar rating={player.servingAverage} label="Serving" />
+                    <RatingBar rating={player.defenseAverage} label="Defense" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Attacking</p>
-                      <p className="font-medium">{player.attackingAverage || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Serving</p>
-                      <p className="font-medium">{player.servingAverage || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Defense</p>
-                      <p className="font-medium">{player.defenseAverage || 'N/A'}</p>
+                    <div className="flex flex-col items-center justify-center border-l pl-4">
+      <span className="text-sm font-medium text-gray-700">Overall Rating</span>
+      <span className="text-4xl font-bold text-gray-900 mt-2">{player.overallRating || 'N/A'}</span>
+      {player.overallRating && player.overallRating >= 4.5 && (
+        <Star className="h-6 w-6 text-yellow-400 mt-2" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -403,11 +427,18 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
                 <div>
                   <h4 className="font-medium mb-3">Assessment History</h4>
                   <div className="space-y-3">
-                    {Object.entries(player.assessments || {}).map(([date, assessment]) => (
-                      <div key={date} className="bg-white border rounded-lg p-4">
+                    {([...(player.assessments || [])].reverse()).map((assessment, index) => (
+                      <div key={index} className="bg-white border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <p className="text-sm font-medium">{new Date(assessment.date).toLocaleDateString()}</p>
-                          {assessment.callback && (
+                          <p className="text-sm font-medium">Assessed by: {assessment.assessedBy}</p>
+                        </div>
+                        <div className="flex justify-between items-start mb-2">
+                          <p className="text-sm font-medium">
+                            {assessment.date instanceof Date 
+                              ? assessment.date.toLocaleDateString()
+                              : new Date(assessment.date.seconds * 1000).toLocaleDateString()}
+                          </p>
+                          {assessment.status === 'callback' && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               <Award className="w-4 h-4 mr-1" />
                               Callback
@@ -415,11 +446,11 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
                           )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
-                          <p><span className="text-gray-500">Ball Control:</span> {assessment.ballControl}</p>
-                          <p><span className="text-gray-500">Attacking:</span> {assessment.attacking}</p>
-                          <p><span className="text-gray-500">Serving:</span> {assessment.serving}</p>
-                          <p><span className="text-gray-500">Setting:</span> {assessment.setting}</p>
-                          <p><span className="text-gray-500">Digging:</span> {assessment.digging}</p>
+                          <p><span className="text-gray-500">Ball Control:</span> {assessment.categoryAverages.ballControl}</p>
+                          <p><span className="text-gray-500">Attacking:</span> {assessment.categoryAverages.attacking}</p>
+                          <p><span className="text-gray-500">Serving:</span> {assessment.categoryAverages.serving}</p>
+                          <p><span className="text-gray-500">Defense:</span> {assessment.categoryAverages.defense}</p>
+                          <p><span className="text-gray-500">Overall:</span> {assessment.overallRating}</p>
                         </div>
                         {assessment.notes && (
                           <p className="text-sm mt-2">
