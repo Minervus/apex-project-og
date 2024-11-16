@@ -30,6 +30,13 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
     >
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
+        <td className="px-6 py-4 whitespace-nowrap">
+        {player.ageGroup && (
+          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+            {player.ageGroup}
+          </span>
+        )}
+      </td>
           <div className="h-10 w-10 flex-shrink-0">
             <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
               <User className="h-5 w-5 text-indigo-600" />
