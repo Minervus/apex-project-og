@@ -6,6 +6,7 @@ import PlayerProfile from './PlayerProfile';
 
 interface PlayerTableRowProps {
   player: Player;
+  players: Player[];
   onClick: (player: Player) => void;
 }
 
@@ -28,6 +29,7 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
       className="hover:bg-gray-50 transition-colors cursor-pointer"
       onClick={() => onClick(player)}
     >
+
       <td className="w-32 px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         {player.ageGroup}
       </td>
@@ -70,6 +72,7 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
     </tr>
   );
 };
+
 
 // ... keep all the imports and PlayerTableRow component the same ...
 
@@ -117,6 +120,7 @@ const PlayerTable: React.FC = () => {
 
   return (
     <>
+
       <tbody className="bg-white divide-y divide-gray-200">
         {players.map((player) => (
           <PlayerTableRow 
@@ -126,6 +130,7 @@ const PlayerTable: React.FC = () => {
           />
         ))}
       </tbody>
+
 
       {/* Player Profile Modal */}
       {selectedPlayer && (
