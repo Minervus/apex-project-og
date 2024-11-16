@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { User, ChevronRight } from 'lucide-react';
 import { Player } from '../types/player';
 import { usePlayers } from '../hooks/useFirestore';
@@ -8,6 +8,12 @@ interface PlayerTableRowProps {
   player: Player;
   players: Player[];
   onClick: (player: Player) => void;
+}
+
+
+interface PlayerTableProps {
+  ageGroupFilter: string;
+  statusFilter: string;
 }
 
 const getStatusColor = (status: string) => {
@@ -87,7 +93,7 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
   );
 };
 
-const PlayerTable: React.FC = ({}) => {
+const PlayerTable: React.FC = ({ageGroupFilter, statusFilter }) => {
   const { players, loading, error } = usePlayers();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   console.log('🎯 PlayerTable render:', { 
@@ -96,6 +102,15 @@ const PlayerTable: React.FC = ({}) => {
     error,
     players 
   });
+  const filteredPlayers = useMemo(() => {
+    return players?.filter((player) => {
+      const matchesAgeGroup = ageGroupFilter === 'all' || player.ageGroup === ageGroupFilter;
+      const matchesStatus = statusFilter === 'all' || player.status == statusFilter;
+      return matchesAgeGroup && matchesStatus;
+    });
+  }, [players, ageGroupFilter, statusFilter]);
+
+
     // Handle closing the profile modal
   const handleClose = () => {
     setSelectedPlayer(null);
@@ -175,14 +190,14 @@ const PlayerTable: React.FC = ({}) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {players.map((player) => (
-            <PlayerTableRow 
-              key={player.id} 
-              player={player} 
-              onClick={setSelectedPlayer}
-            />
-          ))}
-        </tbody>
+        {filteredPlayers?.map((player) => (
+          <PlayerTableRow 
+            key={player.id} 
+            player={player} 
+            onClick={setSelectedPlayer}
+          />
+        ))}
+      </tbody>
       </table>
 
 
