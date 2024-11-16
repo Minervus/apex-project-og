@@ -29,20 +29,16 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
       className="hover:bg-gray-50 transition-colors cursor-pointer"
       onClick={() => onClick(player)}
     >
-        <td className="px-6 py-4 whitespace-nowrap">
-        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-          {player.primaryPosition}
+        {/* Age Group */}
+      <td className="w-32 px-6 py-4 whitespace-nowrap">
+        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+          {player.ageGroup}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      
+      {/* Player Info */}
+      <td className="w-72 px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
-        <td className="px-6 py-4 whitespace-nowrap">
-        {player.ageGroup && (
-          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-            {player.ageGroup}
-          </span>
-        )}
-      </td>
           <div className="h-10 w-10 flex-shrink-0">
             <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
               <User className="h-5 w-5 text-indigo-600" />
@@ -54,27 +50,37 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+
+      {/* Primary Position */}
+      <td className="w-40 px-6 py-4 whitespace-nowrap">
         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
           {player.primaryPosition}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+
+      {/* Secondary Position */}
+      <td className="w-40 px-6 py-4 whitespace-nowrap">
         {player.secondaryPosition && (
           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
             {player.secondaryPosition}
           </span>
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+
+      {/* Status */}
+      <td className="w-32 px-6 py-4 whitespace-nowrap">
         <div className={`text-sm font-medium rounded px-2 ${getStatusColor(player.status || 'pending')}`}>
           {player.status || 'Pending'}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+
+      {/* Rating */}
+      <td className="w-32 px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900 font-medium">{player.overallRating || 'N/A'}/5.0</div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+      {/* Details */}
+      <td className="w-20 px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <ChevronRight className="h-5 w-5 text-gray-400" />
       </td>
     </tr>
@@ -145,6 +151,9 @@ const PlayerTable: React.FC = ({}) => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Age Group
+            </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Player
             </th>
