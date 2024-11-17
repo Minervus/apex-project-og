@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { X, Star, Award, Save, Edit2, XCircle } from 'lucide-react';
+import { X, Star, Award, Save, Edit2, XCircle, User } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
 
 const AGE_GROUPS = [
   'Boys U15',
@@ -48,6 +50,8 @@ interface PlayerProfileProps {
 }
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlayer, setEditedPlayer] = useState({
     ...player,
@@ -119,6 +123,70 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
       setIsSaving(false);
     }
   };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      setIsUploading(true);
+      setError(null);
+
+      const auth = getAuth();
+      if (!auth.currentUser) {
+        throw new Error('You must be logged in to upload images');
+      }
+
+      const storage = getStorage();
+      const fileName = `${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, `player-images/${auth.currentUser.uid}/${fileName}`);
+
+      const metadata = {
+        contentType: file.type,
+        customMetadata: {
+          'uploadedBy': auth.currentUser.uid,
+          'uploadedAt': new Date().toISOString(),
+          'playerId': player.id
+        },
+        cacheControl: 'public,max-age=3600'
+      };
+
+      const uploadResult = await uploadBytes(storageRef, file, {
+        ...metadata,
+        customMetadata: {
+          ...metadata.customMetadata,
+          'access-control-allow-origin': '*'
+        }
+      });
+
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      const playerRef = doc(db, 'players', player.id);
+      await updateDoc(playerRef, {
+        imageUrl: downloadURL
+      });
+
+      setEditedPlayer(prev => ({
+        ...prev,
+        imageUrl: downloadURL
+      }));
+
+      setImageFile(null);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Failed to upload image');
+      }
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const getRatingColor = (rating: number) => {
     if (rating >= 4) return 'bg-green-500';
@@ -151,6 +219,8 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
+          
+
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -182,6 +252,80 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
               {error}
             </div>
           )}
+          {/* Profile Image Section */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Profile Image
+        </label>
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
+              {imageFile ? (
+                <img
+                  src={URL.createObjectURL(imageFile)}
+                  alt="Preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : editedPlayer.imageUrl ? (
+                <img
+                  src={editedPlayer.imageUrl}
+                  alt={`${player.name}'s profile`}
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '';
+                    e.currentTarget.className = 'hidden';
+                    e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                  }}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center">
+                  <User className="h-12 w-12 text-gray-400" />
+                </div>
+              )}
+            </div>
+            {isUploading && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col space-y-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+              id="player-image-upload"
+            />
+            <label
+              htmlFor="player-image-upload"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              Choose Image
+            </label>
+            {imageFile && (
+              <button
+                onClick={() => handleImageUpload(imageFile)}
+                disabled={isUploading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              >
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin mr-2 h-4 w-4 border-b-2 border-white rounded-full" />
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload Image'
+                )}
+              </button>
+            )}
+            {error && (
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            )}
+          </div>
+        </div>
+      </div>
+          {/* Player Details */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-6">

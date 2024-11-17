@@ -46,9 +46,26 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({ player, onClick }) => {
       <td className="w-72 px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="h-10 w-10 flex-shrink-0">
-            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-              <User className="h-5 w-5 text-indigo-600" />
-            </div>
+          {player.imageUrl ? (
+              <img
+                src={player.imageUrl}
+                alt={`${player.name}'s profile`}
+                className="h-10 w-10 rounded-full object-cover"
+                onError={(e) => {
+                  // Fallback to User icon if image fails to load
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement?.classList.add('bg-indigo-100', 'flex', 'items-center', 'justify-center');
+                  const icon = document.createElement('div');
+                  icon.innerHTML = '<div class="h-5 w-5 text-indigo-600"><svg>...</svg></div>';
+                  e.currentTarget.parentElement?.appendChild(icon);
+                }}
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                <User className="h-5 w-5 text-indigo-600" />
+              </div>
+            )}
           </div>
           <div className="ml-4">
             <div className="text-sm font-medium text-gray-900">{player.name}</div>
