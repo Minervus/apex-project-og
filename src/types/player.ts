@@ -6,6 +6,7 @@ export interface Player {
   secondaryPosition?: string;
   status?: 'callback' | 'declined' | 'pending';
   overallRating?: number;
+  imageUrl?: string;
   assessments?: {
     [key: string]: any;
   };

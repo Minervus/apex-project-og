@@ -1,0 +1,21 @@
+[
+  {
+    "origin": ["http://localhost:5173", "http://localhost:3000"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Encoding",
+      "Content-Disposition",
+      "Cache-Control",
+      "x-goog-meta-uploadedby",
+      "x-goog-meta-uploadedat",
+      "x-goog-meta-playerid",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Expose-Headers"
+    ]
+  }
+]
