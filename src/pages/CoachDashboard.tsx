@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, ChevronDown, ChevronUp, Users, ClipboardCheck, ClipboardList, Star, ArrowRight, XCircle, SquareAsterisk } from 'lucide-react';
+import { Activity, ChevronDown, ChevronRight, Users, ClipboardCheck, ClipboardList, Star, ArrowRight, XCircle, SquareAsterisk } from 'lucide-react';
 import { usePlayers } from '../hooks/useFirestore';
 import CoachPlayerTableHeader from '../components/CoachPlayerTableHeader';
 import CoachPlayerTableRow from '../components/CoachPlayerTableRow';
@@ -44,9 +44,33 @@ const CoachDashboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' as const });
   const [currentPage, setCurrentPage] = useState(1);
   const playersPerPage = 15;
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const { players, loading, error } = usePlayers(playersPerPage, currentPage);
 
+  const groupedPlayers = players.reduce((groups: { [key: string]: Player[] }, player) => {
+    const ageGroup = player.ageGroup || 'Unassigned';
+    if (!groups[ageGroup]) {
+      groups[ageGroup] = [];
+    }
+    groups[ageGroup].push(player);
+    return groups;
+  }, {});
+
+  const toggleGroup = (group: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(group)) {
+        next.delete(group);
+      } else {
+        next.add(group);
+      }
+      return next;
+    });
+  };
+  
+  
+  
   const calculateSectionAverage = (categoryName: string) => {
     const sectionAssessments = Object.entries(assessments)
       .filter(([key]) => key.startsWith(categoryName))
@@ -203,30 +227,62 @@ const CoachDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Players List */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Players</h2>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <CoachPlayerTableHeader
-                  sortConfig={sortConfig}
-                  onSort={(key) => setSortConfig({
-                    key,
-                    direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-                  })}
-                />
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {players.map((player) => (
-                    <CoachPlayerTableRow
-                      key={player.id}
-                      player={player}
-                      onClick={setSelectedPlayer}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <h2 className="text-xl font-semibold mb-4">Players</h2>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <CoachPlayerTableHeader
+              sortConfig={sortConfig}
+              onSort={(key) => setSortConfig({
+                key,
+                direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+              })}
+            />
+            <tbody className="bg-white divide-y divide-gray-200">
+              {Object.entries(groupedPlayers).map(([ageGroup, groupPlayers]) => (
+                <React.Fragment key={ageGroup}>
+                  {/* Age Group Header */}
+                  <tr 
+                    className="bg-gray-50 cursor-pointer hover:bg-gray-100"
+                    onClick={() => toggleGroup(ageGroup)}
+                  >
+                    <td colSpan={3} className="px-6 py-3">
+                      <div className="flex items-center">
+                        {expandedGroups.has(ageGroup) ? (
+                          <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
+                        )}
+                        <span className="font-medium text-gray-900">
+                          {ageGroup} ({groupPlayers.length} players)
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  {/* Player Rows */}
+                  {expandedGroups.has(ageGroup) && (
+                    groupPlayers
+                      .sort((a, b) => {
+                        const aValue = a[sortConfig.key as keyof Player];
+                        const bValue = b[sortConfig.key as keyof Player];
+                        const direction = sortConfig.direction === 'asc' ? 1 : -1;
+                        return aValue < bValue ? -direction : direction;
+                      })
+                      .map((player) => (
+                        <CoachPlayerTableRow
+                          key={player.id}
+                          player={player}
+                          onClick={setSelectedPlayer}
+                        />
+                      ))
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
+    </div>
 
         {/* Assessment Form */}
         <div>
