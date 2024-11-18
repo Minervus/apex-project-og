@@ -8,7 +8,7 @@ const PlayerDatabase: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Hardcoded options (you can make these dynamic based on your data)
-  const ageGroupOptions = ['all', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18'];
+  const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all', 'pending', 'callback', 'declined'];
 
   return (
