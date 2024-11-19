@@ -9,7 +9,7 @@ const PlayerDatabase: React.FC = () => {
 
   // Hardcoded options (you can make these dynamic based on your data)
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
-  const statusOptions = ['all', 'pending', 'callback', 'declined'];
+  const statusOptions = ['all','callback', 'declined'];
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
