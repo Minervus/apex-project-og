@@ -45,6 +45,8 @@ const CoachDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const playersPerPage = 15;
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  // Add this near your other state declarations
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const { players, loading, error } = usePlayers(playersPerPage, currentPage);
 
@@ -138,15 +140,21 @@ const CoachDashboard = () => {
         ...sectionAverages
       });
 
-      // Reset form
+    // Show success modal
+    setShowSuccessModal(true);
+
+    // Reset form after a short delay
+    setTimeout(() => {
       setSelectedPlayer(null);
       setAssessments({});
       setNotes('');
       setStatus(null);
-    } catch (error) {
-      console.error('Error updating player:', error);
-      // Optionally add error handling UI feedback here
-    }
+      setShowSuccessModal(false);
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error updating player:', error);
+  }
   };
 
   if (loading) {
@@ -468,6 +476,42 @@ const CoachDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-30"></div>
+          <div className="bg-white rounded-lg p-6 shadow-xl z-10 transform transition-all ease-in-out duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                  <svg
+                    className="h-6 w-6 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="text-center sm:text-left">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Assessment Saved Successfully
+                </h3>
+                <p className="text-sm text-gray-500">
+                  The player assessment has been updated.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
