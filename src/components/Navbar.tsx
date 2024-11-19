@@ -14,8 +14,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <CircleDot className="h-8 w-8 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-800">Apex Volleyball</span>
+            <img src="https://firebasestorage.googleapis.com/v0/b/apex-prototype.appspot.com/o/assets%2FApex_primary_1%20(1).png?alt=media&token=66a31da6-3896-448a-a86d-e10edd7c7e99" alt="Logo" className="h-12 w-18" />
+            <span className="text-xl font-bold text-gray-800"></span>
           </Link>
           
           <div className="flex items-center space-x-6">
