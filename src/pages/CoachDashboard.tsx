@@ -80,6 +80,11 @@ const CoachDashboard = () => {
 
     if (sectionAssessments.length === 0) return null;
 
+    const requiredSubcategories = assessmentCategories
+      .find(cat => cat.name === categoryName)?.subcategories.length || 0;
+      
+    if (sectionAssessments.length < requiredSubcategories) return null;
+
     const sum = sectionAssessments.reduce((acc, rating) => acc + rating, 0);
     return (sum / sectionAssessments.length).toFixed(1);
   };
@@ -88,11 +93,11 @@ const CoachDashboard = () => {
     const categories = ['Ball Control', 'Attacking', 'Serving', 'Defense'];
     const averages = categories
       .map(category => calculateSectionAverage(category))
-      .filter((avg): avg is string => avg !== null)
-      .map(avg => parseFloat(avg));
+      .filter((avg): avg is string => avg !== null);
 
-    if (averages.length === 0) return null;
-    return (averages.reduce((sum, avg) => sum + avg, 0) / averages.length).toFixed(1);
+    if (averages.length < categories.length) return null;
+    
+    return (averages.reduce((sum, avg) => sum + parseFloat(avg), 0) / averages.length).toFixed(1);
   };
 
   const handleAssessmentChange = (category: string, subcategory: string, value: string) => {
@@ -111,22 +116,22 @@ const CoachDashboard = () => {
 
     try {
       const sectionAverages = {
-        ballControlAverage: calculateSectionAverage('Ball Control'),
-        attackingAverage: calculateSectionAverage('Attacking'),
-        servingAverage: calculateSectionAverage('Serving'),
-        defenseAverage: calculateSectionAverage('Defense')
+        ballControlAverage: calculateSectionAverage('Ball Control') || 'Unassessed',
+        attackingAverage: calculateSectionAverage('Attacking') || 'Unassessed',
+        servingAverage: calculateSectionAverage('Serving') || 'Unassessed',
+        defenseAverage: calculateSectionAverage('Defense') || 'Unassessed'
       };
       
       const newAssessment = {
         date: new Date(),
         status: status,
         notes: notes,
-        overallRating: calculateOverallRating(),
+        overallRating: calculateOverallRating() || 'Unassessed',
         categoryAverages: {
-          ballControl: calculateSectionAverage('Ball Control'),
-          attacking: calculateSectionAverage('Attacking'),
-          serving: calculateSectionAverage('Serving'),
-          defense: calculateSectionAverage('Defense')
+          ballControl: calculateSectionAverage('Ball Control') || 'Unassessed',
+          attacking: calculateSectionAverage('Attacking') || 'Unassessed',
+          serving: calculateSectionAverage('Serving') || 'Unassessed',
+          defense: calculateSectionAverage('Defense') || 'Unassessed'
         },
         assessedBy: auth.currentUser.email
       };
@@ -238,62 +243,55 @@ const CoachDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
         {/* Players List */}
         <div>
       <h2 className="text-xl font-semibold mb-4">Players</h2>
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <CoachPlayerTableHeader
-              sortConfig={sortConfig}
-              onSort={(key) => setSortConfig({
-                key,
-                direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-              })}
-            />
-            <tbody className="bg-white divide-y divide-gray-200">
-              {Object.entries(groupedPlayers).map(([ageGroup, groupPlayers]) => (
-                <React.Fragment key={ageGroup}>
-                  {/* Age Group Header */}
-                  <tr 
-                    className="bg-gray-50 cursor-pointer hover:bg-gray-100"
-                    onClick={() => toggleGroup(ageGroup)}
-                  >
-                    <td colSpan={3} className="px-6 py-3">
-                      <div className="flex items-center">
-                        {expandedGroups.has(ageGroup) ? (
-                          <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
-                        ) : (
-                          <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
-                        )}
-                        <span className="font-medium text-gray-900">
-                          {ageGroup} ({groupPlayers.length} players)
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                  {/* Player Rows */}
-                  {expandedGroups.has(ageGroup) && (
-                    groupPlayers
-                      .sort((a, b) => {
-                        const aValue = a[sortConfig.key as keyof Player];
-                        const bValue = b[sortConfig.key as keyof Player];
-                        const direction = sortConfig.direction === 'asc' ? 1 : -1;
-                        return aValue < bValue ? -direction : direction;
-                      })
-                      .map((player) => (
-                        <CoachPlayerTableRow
-                          key={player.id}
-                          player={player}
-                          onClick={setSelectedPlayer}
-                        />
-                      ))
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex flex-col h-[600px]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <CoachPlayerTableHeader
+                sortConfig={sortConfig}
+                onSort={(key) => setSortConfig({
+                  key,
+                  direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+                })}
+              />
+              <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
+                {Object.entries(groupedPlayers).map(([ageGroup, groupPlayers]) => (
+                  <React.Fragment key={ageGroup}>
+                    {/* Age Group Header */}
+                    <tr 
+                      className="bg-gray-50 cursor-pointer hover:bg-gray-100"
+                      onClick={() => toggleGroup(ageGroup)}
+                    >
+                      <td colSpan={3} className="px-6 py-3">
+                        <div className="flex items-center">
+                          {expandedGroups.has(ageGroup) ? (
+                            <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
+                          )}
+                          <span className="font-medium text-gray-900">
+                            {ageGroup} ({groupPlayers.length} players)
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                    {/* Player Rows */}
+                    {expandedGroups.has(ageGroup) && groupPlayers.map((player) => (
+                      <CoachPlayerTableRow
+                        key={player.id}
+                        player={player}
+                        onClick={setSelectedPlayer}
+                      />
+                    ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -352,11 +350,18 @@ const CoachDashboard = () => {
                         {selectedPlayer.status || 'Pending'}
                       </span>
                     </div>
-                    {calculateOverallRating() && (
+                    {calculateOverallRating() !== null ? (
                       <div className="col-span-2">
                         <span className="text-gray-500">Overall Rating:</span>
                         <span className="ml-2 px-2 py-1 bg-indigo-100 text-indigo-800 rounded-md font-medium">
                           {calculateOverallRating()}/5.0
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="col-span-2">
+                        <span className="text-gray-500">Overall Rating:</span>
+                        <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 rounded-md font-medium">
+                          Unassessed
                         </span>
                       </div>
                     )}
@@ -412,14 +417,12 @@ const CoachDashboard = () => {
                     <div key={category.name} className="space-y-4">
                       <div className="flex justify-between items-center border-b pb-2 sticky top-0 bg-white z-10">
                         <h3 className="font-medium text-lg">{category.name}</h3>
-                        {calculateSectionAverage(category.name) && (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-500">Average Rating:</span>
-                            <span className="font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-                              {calculateSectionAverage(category.name)}
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-gray-500">Average Rating:</span>
+                          <span className="font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+                            {calculateSectionAverage(category.name) || 'Unassessed'}
+                          </span>
+                        </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {category.subcategories.map((subcategory) => (
@@ -428,12 +431,11 @@ const CoachDashboard = () => {
                               {subcategory}
                             </label>
                             <select
-                              required
                               onChange={(e) => handleAssessmentChange(category.name, subcategory, e.target.value)}
                               value={assessments[`${category.name}-${subcategory}`]?.rating || ''}
                               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
-                              <option value="">Select Rating</option>
+                              <option value="">Unassessed</option>
                               {[1, 2, 3, 4, 5].map((rating) => (
                                 <option key={rating} value={rating}>
                                   {rating} - {
