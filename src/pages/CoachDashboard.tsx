@@ -176,57 +176,63 @@ const CoachDashboard = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Dashboard Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Today's Players</p>
-              <p className="text-2xl font-semibold text-gray-900">{players.length}</p>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-full">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {players.filter(p => !p.status || p.status === 'pending').length}
-              </p>
-            </div>
-            <div className="p-3 bg-yellow-50 rounded-full">
-              <ClipboardList className="h-6 w-6 text-yellow-600" />
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="grid grid-cols-4 divide-x divide-gray-200">
+          {/* Total Players */}
+          <div className="px-4 first:pl-0">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Users className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-lg font-semibold text-gray-900">{players.length}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Callbacks</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {players.filter(p => p.status === 'callback').length}
-              </p>
-            </div>
-            <div className="p-3 bg-green-50 rounded-full">
-              <ClipboardCheck className="h-6 w-6 text-green-600" />
+          {/* Pending */}
+          <div className="px-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <ClipboardList className="h-4 w-4 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Pending</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {players.filter(p => !p.status || p.status === 'pending').length}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Declined</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {players.filter(p => p.status === 'declined').length}
-              </p>
+          {/* Callbacks */}
+          <div className="px-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <ClipboardCheck className="h-4 w-4 text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Callbacks</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {players.filter(p => p.status === 'callback').length}
+                </p>
+              </div>
             </div>
-            <div className="p-3 bg-red-50 rounded-full">
-              <XCircle className="h-6 w-6 text-red-600" />
+          </div>
+
+          {/* Declined */}
+          <div className="px-4 last:pr-0">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-red-50 rounded-lg">
+                <XCircle className="h-4 w-4 text-red-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Declined</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {players.filter(p => p.status === 'declined').length}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -400,52 +406,54 @@ const CoachDashboard = () => {
                   </div>
                 </div>
 
-                {/* Assessment Categories */}
-                {assessmentCategories.map((category) => (
-                  <div key={category.name} className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-2">
-                      <h3 className="font-medium text-lg">{category.name}</h3>
-                      {calculateSectionAverage(category.name) && (
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-500">Average Rating:</span>
-                          <span className="font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
-                            {calculateSectionAverage(category.name)}
-                          </span>
-                        </div>
-                      )}
+                {/* Scrollable Assessment Categories */}
+                <div className="max-h-[400px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {assessmentCategories.map((category) => (
+                    <div key={category.name} className="space-y-4">
+                      <div className="flex justify-between items-center border-b pb-2 sticky top-0 bg-white z-10">
+                        <h3 className="font-medium text-lg">{category.name}</h3>
+                        {calculateSectionAverage(category.name) && (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500">Average Rating:</span>
+                            <span className="font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+                              {calculateSectionAverage(category.name)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {category.subcategories.map((subcategory) => (
+                          <div key={subcategory} className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">
+                              {subcategory}
+                            </label>
+                            <select
+                              required
+                              onChange={(e) => handleAssessmentChange(category.name, subcategory, e.target.value)}
+                              value={assessments[`${category.name}-${subcategory}`]?.rating || ''}
+                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                              <option value="">Select Rating</option>
+                              {[1, 2, 3, 4, 5].map((rating) => (
+                                <option key={rating} value={rating}>
+                                  {rating} - {
+                                    rating === 1 ? 'Needs Improvement' :
+                                    rating === 2 ? 'Fair' :
+                                    rating === 3 ? 'Good' :
+                                    rating === 4 ? 'Very Good' :
+                                    'Excellent'
+                                  }
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {category.subcategories.map((subcategory) => (
-                        <div key={subcategory} className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            {subcategory}
-                          </label>
-                          <select
-                            required
-                            onChange={(e) => handleAssessmentChange(category.name, subcategory, e.target.value)}
-                            value={assessments[`${category.name}-${subcategory}`]?.rating || ''}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                          >
-                            <option value="">Select Rating</option>
-                            {[1, 2, 3, 4, 5].map((rating) => (
-                              <option key={rating} value={rating}>
-                                {rating} - {
-                                  rating === 1 ? 'Needs Improvement' :
-                                  rating === 2 ? 'Fair' :
-                                  rating === 3 ? 'Good' :
-                                  rating === 4 ? 'Very Good' :
-                                  'Excellent'
-                                }
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 pt-4 border-t">
                   <label className="block text-sm font-medium text-gray-700">
                     Additional Notes
                   </label>
@@ -458,7 +466,7 @@ const CoachDashboard = () => {
                   />
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end pt-4">
                   <button
                     type="submit"
                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
