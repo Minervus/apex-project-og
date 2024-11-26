@@ -26,4 +26,4 @@ dist-ssr
 # Firebase
 firebase.json
 firebase.rules
-firebase.debug.json 
+firebase.debug.json sendgrid.env

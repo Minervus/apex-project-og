@@ -7,6 +7,7 @@ import type { Player } from '../types/player';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase.ts/'; // Adjust this import path based on your firebase config location
 import { auth } from '../lib/firebase'; 
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface Assessment {
   rating: number;
@@ -491,26 +492,16 @@ const CoachDashboard = () => {
       {showSuccessModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="fixed inset-0 bg-black opacity-30"></div>
-          <div className="bg-white rounded-lg p-6 shadow-xl z-10 transform transition-all ease-in-out duration-300">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                  <svg
-                    className="h-6 w-6 text-green-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
+          <div className="bg-white rounded-lg p-6 shadow-xl z-10 transform transition-all ease-in-out duration-1500">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-32 h-32"> {/* Adjust size as needed */}
+                <DotLottieReact
+                  src="https://lottie.host/185ff7ef-f3ff-437f-b72c-296ea529ab57/qcgMVlr6Bn.lottie"
+                  loop
+                  autoplay
+                />
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900">
                   Assessment Saved Successfully
                 </h3>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PlayerTable from '../components/PlayerTableRow';
 import { Filter } from 'lucide-react';
 
+
 const PlayerDatabase: React.FC = () => {
   // Filter states
   const [ageGroupFilter, setAgeGroupFilter] = useState<string>('all');
@@ -11,11 +12,15 @@ const PlayerDatabase: React.FC = () => {
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all','callback', 'declined'];
 
+  
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Player Database</h1>
         
+      
+
         {/* Filter Section */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
