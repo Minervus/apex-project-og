@@ -7,16 +7,16 @@ dotenv.config();
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true',
+  host: process.env.VITE_SMTP_HOST,
+  port: parseInt(process.env.VITE_SMTP_PORT || '587'),
+  secure: process.env.VITE_SMTP_SECURE === 'true',
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.VITE_SMTP_USER,
+    pass: process.env.VITE_SMTP_PASS,
   },
 });
 
-router.post('/api/send-bulk-email', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { recipients, subject, body } = req.body;
 
@@ -36,7 +36,7 @@ router.post('/api/send-bulk-email', async (req, res) => {
         transporter.sendMail({
           from: {
             name: 'Your App Name',
-            address: process.env.SMTP_FROM_ADDRESS as string
+            address: process.env.VITE_SMTP_FROM_ADDRESS as string
           },
           to: {
             name: recipient.name,
@@ -66,6 +66,7 @@ router.post('/api/send-bulk-email', async (req, res) => {
       success: true, 
       message: `Successfully sent ${results.length} emails` 
     });
+    console.log('Emails details:', results);
 
   } catch (error) {
     console.error('Error sending emails:', error);
