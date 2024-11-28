@@ -11,6 +11,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Add this before your routes
+app.use((req, res, next) => {
+  console.log('Incoming request:', {
+    method: req.method,
+    path: req.path,
+    body: req.body
+  });
+  next();
+});
+
 // Use the emailRouter directly
 app.use('/api/send-bulk-email', emailRouter);
 

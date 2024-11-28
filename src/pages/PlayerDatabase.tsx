@@ -26,7 +26,7 @@ const PlayerDatabase: React.FC = () => {
     try {
       setIsSending(true);
       
-      const response = await fetch(`${API_URL}/api/send-bulk-email`, {
+      const response = await fetch(`${API_URL}/send-bulk-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
