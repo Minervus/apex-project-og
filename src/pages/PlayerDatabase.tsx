@@ -18,7 +18,7 @@ const PlayerDatabase: React.FC = () => {
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all','callback', 'declined'];
 
-  const API_URL = import.meta.env.VITE_API_URL || 'https://54.81.134.19:3000';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://54.81.134.19:3000';
 
   const handleSendEmail = async () => {
     if (isSending) return;
