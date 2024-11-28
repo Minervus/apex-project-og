@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, Square } from 'lucide-react';
 
 interface SortConfig {
   key: string;
@@ -9,10 +9,20 @@ interface SortConfig {
 interface PlayerTableHeaderProps {
   sortConfig: SortConfig;
   onSort: (key: string) => void;
+  onSelectAll: () => void;
+  isAllSelected: boolean;
+  hasFilteredPlayers: boolean;
 }
 
-const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({ sortConfig, onSort }) => {
+const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({ 
+  sortConfig, 
+  onSort, 
+  onSelectAll, 
+  isAllSelected, 
+  hasFilteredPlayers 
+}) => {
   const headers = [
+    { key: 'select', label: '', width: 'w-10' },
     { key: 'ageGroup', label: 'Age Group', width: 'w-32' },
     { key: 'name', label: 'Player', width: 'w-72' },
     { key: 'primaryPosition', label: 'Primary Position', width: 'w-40' },
@@ -25,7 +35,20 @@ const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({ sortConfig, onSor
   return (
     <thead className="bg-gray-50">
       <tr>
-        {headers.map((header) => (
+        <th className="px-6 py-3 text-left w-10">
+          <button 
+            onClick={onSelectAll}
+            disabled={!hasFilteredPlayers}
+            className="disabled:opacity-50"
+          >
+            {isAllSelected ? (
+              <CheckSquare className="h-5 w-5 text-indigo-600" />
+            ) : (
+              <Square className="h-5 w-5 text-gray-400" />
+            )}
+          </button>
+        </th>
+        {headers.slice(1).map((header) => (
           <th
             key={header.key}
             scope="col"
@@ -35,7 +58,6 @@ const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({ sortConfig, onSor
           >
             {header.key === 'name' ? (
               <div className="flex items-center">
-                <div className="w-10"></div>
                 <div className="ml-4">{header.label}</div>
               </div>
             ) : (

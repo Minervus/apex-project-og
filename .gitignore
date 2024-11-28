@@ -26,4 +26,15 @@ dist-ssr
 # Firebase
 firebase.json
 firebase.rules
-firebase.debug.json 
+firebase.debug.json
+
+# Vite
+vite.config.ts
+vite-env.d.ts
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+sendgrid.env
