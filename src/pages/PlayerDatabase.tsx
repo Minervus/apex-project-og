@@ -18,13 +18,15 @@ const PlayerDatabase: React.FC = () => {
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all','callback', 'declined'];
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
   const handleSendEmail = async () => {
     if (isSending) return;
     
     try {
       setIsSending(true);
       
-      const response = await fetch('http://localhost:3000/api/send-bulk-email', {
+      const response = await fetch(`${API_URL}/api/send-bulk-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
