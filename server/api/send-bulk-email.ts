@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
       const emailPromises = batch.map(recipient => 
         transporter.sendMail({
           from: {
-            name: 'Your App Name',
+            name: 'Apex Volleyball',
             address: process.env.VITE_SMTP_FROM_ADDRESS as string
           },
           to: {

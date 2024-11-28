@@ -12,14 +12,19 @@ const PlayerDatabase: React.FC = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   // Hardcoded options (you can make these dynamic based on your data)
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all','callback', 'declined'];
 
   const handleSendEmail = async () => {
+    if (isSending) return;
+    
     try {
-      const response = await fetch('/api/send-bulk-email', {
+      setIsSending(true);
+      
+      const response = await fetch('http://localhost:3000/api/send-bulk-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,15 +40,20 @@ const PlayerDatabase: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send emails');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send emails');
       }
 
+      const result = await response.json();
+      console.log('Email send result:', result);
+
       setShowEmailModal(false);
-      // Show success message
       alert('Emails sent successfully!');
     } catch (error) {
       console.error('Error sending emails:', error);
-      alert('Failed to send emails. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to send emails. Please try again.');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -160,10 +170,10 @@ const PlayerDatabase: React.FC = () => {
               </button>
               <button
                 onClick={handleSendEmail}
-                disabled={!emailSubject || !emailBody}
+                disabled={!emailSubject || !emailBody || isSending}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
               >
-                Send Email
+                {isSending ? 'Sending...' : 'Send Email'}
               </button>
             </div>
           </div>
