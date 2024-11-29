@@ -112,7 +112,7 @@ const PlayerTableRow: React.FC<PlayerTableRowProps> = ({
       {/* Status */}
       <td className="w-32 px-6 py-4 whitespace-nowrap">
         <div className={`text-sm font-medium rounded px-2 ${getStatusColor(player.status || 'pending')}`}>
-          {player.status || 'Pending'}
+          {(player.status && player.status.charAt(0).toUpperCase() + player.status.slice(1)) || 'Pending'}
         </div>
       </td>
 

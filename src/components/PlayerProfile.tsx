@@ -47,9 +47,10 @@ interface PlayerProfileProps {
     defenseAverage?: string;
   };
   onClose: () => void;
+  onUpdate?: (updatedPlayer: any) => void;
 }
 
-const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
+const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose, onUpdate }) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -112,8 +113,42 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
       setIsSaving(true);
       setError(null);
       
+      const updates: Record<string, any> = {
+        email: editedPlayer.email || null,
+        phone: editedPlayer.phone || null,
+        primaryPosition: editedPlayer.primaryPosition || null,
+        secondaryPosition: editedPlayer.secondaryPosition || null,
+        previousClub: editedPlayer.previousClub || null,
+        tryingOutFor: editedPlayer.tryingOutFor || [],
+        status: editedPlayer.status || 'pending',
+        updatedAt: new Date()
+      };
+      
+      if (editedPlayer.name) updates.name = editedPlayer.name;
+      if (editedPlayer.ageGroup) updates.ageGroup = editedPlayer.ageGroup;
+      if (typeof editedPlayer.overallRating === 'number') {
+        updates.overallRating = editedPlayer.overallRating;
+      }
+      
+      Object.keys(updates).forEach(key => {
+        if (updates[key] === null || updates[key] === undefined) {
+          delete updates[key];
+        }
+      });
+      
       const playerRef = doc(db, 'players', player.id);
-      await updateDoc(playerRef, editedPlayer);
+      await updateDoc(playerRef, updates);
+      
+      const updatedPlayer = {
+        ...player,
+        ...updates
+      };
+      
+      setEditedPlayer(updatedPlayer);
+      
+      if (onUpdate) {
+        onUpdate(updatedPlayer);
+      }
       
       setIsEditing(false);
     } catch (err) {
@@ -214,6 +249,37 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
     );
   };
 
+  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value;
+    try {
+      setIsSaving(true);
+      
+      // Update Firestore
+      const playerRef = doc(db, 'players', player.id);
+      await updateDoc(playerRef, {
+        status: newStatus,
+        updatedAt: new Date()
+      });
+      
+      // Update local state
+      const updatedPlayer = {
+        ...player,
+        status: newStatus
+      };
+      
+      setEditedPlayer(updatedPlayer);
+      
+      // Notify parent component
+      if (onUpdate) {
+        onUpdate(updatedPlayer);
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setError('Failed to update status. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -383,9 +449,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
                           onChange={handleInputChange}
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
-                          <option value="active">Active</option>
+                          <option value="callback">Callback</option>
                           <option value="pending">Pending</option>
-                          <option value="inactive">Inactive</option>
+                          <option value="declined">Declined</option>
                         </select>
                       </div>
                     </>
@@ -401,9 +467,15 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onClose }) => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Status</p>
-                        <span className={getStatusColor(player.status)}>
-                          {player.status || 'Pending'}
-                        </span>
+                        <select
+                          value={player.status || 'pending'}
+                          onChange={handleStatusChange}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                        >
+                          <option value="callback">Callback</option>
+                          <option value="pending">Pending</option>
+                          <option value="declined">Declined</option>
+                        </select>
                       </div>
                     </>
                   )}

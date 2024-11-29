@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PlayerTableHeader from './PlayerTableHeader';
 import PlayerTableRow from './PlayerTableRow';
 import PlayerProfile from './PlayerProfile';
@@ -8,26 +8,37 @@ import type { Player } from '../types/player';
 interface PlayerTableProps {
   ageGroupFilter: string;
   statusFilter: string;
-  onSelectionChange: (selectedPlayers: Player[]) => void;
+  onSelectionChange: (players: Player[]) => void;
+  players: Player[];
+  onPlayerUpdate: (player: Player) => void;
+  selectedPlayer: Player | null;
+  setSelectedPlayer: (player: Player | null) => void;
 }
 
 const PlayerTable: React.FC<PlayerTableProps> = ({
   ageGroupFilter,
   statusFilter,
   onSelectionChange,
+  players,
+  onPlayerUpdate,
+  selectedPlayer,
+  setSelectedPlayer
 }) => {
-  const { players, loading, error } = usePlayers();
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const { players: firestorePlayers, loading, error } = usePlayers();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' as const });
 
+  useEffect(() => {
+    console.log('PlayerTable received updated players:', players);
+  }, [players]);
+
   const filteredPlayers = useMemo(() => {
-    return players?.filter((player) => {
+    return firestorePlayers?.filter((player) => {
       const matchesAgeGroup = ageGroupFilter === 'all' || player.ageGroup === ageGroupFilter;
       const matchesStatus = statusFilter === 'all' || player.status === statusFilter;
       return matchesAgeGroup && matchesStatus;
     });
-  }, [players, ageGroupFilter, statusFilter]);
+  }, [firestorePlayers, ageGroupFilter, statusFilter]);
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredPlayers?.length) {
@@ -51,6 +62,10 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
     onSelectionChange(filteredPlayers?.filter(p => newSelected.has(p.id)) || []);
   };
 
+  const handlePlayerUpdate = (updatedPlayer: Player) => {
+    onPlayerUpdate(updatedPlayer);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-4">
@@ -63,7 +78,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
     return <div className="text-center py-4 text-red-600">{error}</div>;
   }
 
-  if (!players?.length) {
+  if (!firestorePlayers?.length) {
     return <div className="text-center py-4 text-gray-500">No players found</div>;
   }
 
@@ -85,7 +100,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
             <PlayerTableRow
               key={player.id}
               player={player}
-              onClick={setSelectedPlayer}
+              onClick={(player) => setSelectedPlayer(player)}
               isSelected={selectedIds.has(player.id)}
               onToggleSelect={handleToggleSelect}
             />
@@ -97,6 +112,10 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
         <PlayerProfile
           player={selectedPlayer}
           onClose={() => setSelectedPlayer(null)}
+          onUpdate={(updatedPlayer) => {
+            console.log('PlayerProfile update:', updatedPlayer);
+            onPlayerUpdate(updatedPlayer);
+          }}
         />
       )}
     </>
