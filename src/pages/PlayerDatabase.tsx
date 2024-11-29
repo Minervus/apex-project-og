@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PlayerTable from '../components/PlayerTable';
 import { Filter, Mail, CheckSquare, Square } from 'lucide-react';
 import type { Player } from '../types/player';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 
 const PlayerDatabase: React.FC = () => {
@@ -13,12 +15,32 @@ const PlayerDatabase: React.FC = () => {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+
+  // Add this useEffect to log state changes
+  useEffect(() => {
+    console.log('Players state updated:', players);
+  }, [players]);
 
   // Hardcoded options (you can make these dynamic based on your data)
   const ageGroupOptions = ['all', 'BoysU18','GirlsU18'];
   const statusOptions = ['all','callback', 'declined'];
 
   const API_URL = '/api';
+
+  useEffect(() => {
+    const q = query(collection(db, 'players'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const updatedPlayers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Player[];
+      setPlayers(updatedPlayers);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleSendEmail = async () => {
     if (isSending) return;
@@ -57,6 +79,22 @@ const PlayerDatabase: React.FC = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handlePlayerUpdate = (updatedPlayer: Player) => {
+    console.log('Handling player update:', updatedPlayer);
+    
+    // Update players array
+    setPlayers(prevPlayers => {
+      const newPlayers = prevPlayers.map(p => 
+        p.id === updatedPlayer.id ? updatedPlayer : p
+      );
+      console.log('Updated players array:', newPlayers);
+      return newPlayers;
+    });
+    
+    // Update selected player
+    setSelectedPlayer(updatedPlayer);
   };
 
   return (
@@ -114,6 +152,10 @@ const PlayerDatabase: React.FC = () => {
             ageGroupFilter={ageGroupFilter}
             statusFilter={statusFilter}
             onSelectionChange={setSelectedPlayers}
+            players={players}
+            onPlayerUpdate={handlePlayerUpdate}
+            selectedPlayer={selectedPlayer}
+            setSelectedPlayer={setSelectedPlayer}
           />
         </div>
       </div>
