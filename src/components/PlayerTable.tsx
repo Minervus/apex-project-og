@@ -33,12 +33,34 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
   }, [players]);
 
   const filteredPlayers = useMemo(() => {
-    return firestorePlayers?.filter((player) => {
+    let sorted = [...(firestorePlayers || [])].filter((player) => {
       const matchesAgeGroup = ageGroupFilter === 'all' || player.ageGroup === ageGroupFilter;
       const matchesStatus = statusFilter === 'all' || player.status === statusFilter;
       return matchesAgeGroup && matchesStatus;
     });
-  }, [firestorePlayers, ageGroupFilter, statusFilter]);
+
+    // Add sorting logic
+    sorted.sort((a, b) => {
+      if (sortConfig.key === 'number') {
+        // Convert to numbers for comparison, treating empty/null values as -1
+        const aNum = a.number ? parseInt(a.number) : -1;
+        const bNum = b.number ? parseInt(b.number) : -1;
+        return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+
+      // Handle other fields
+      const aValue = a[sortConfig.key as keyof Player] || '';
+      const bValue = b[sortConfig.key as keyof Player] || '';
+      
+      if (sortConfig.direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+    return sorted;
+  }, [firestorePlayers, ageGroupFilter, statusFilter, sortConfig]);
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredPlayers?.length) {

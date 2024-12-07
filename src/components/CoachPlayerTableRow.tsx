@@ -26,10 +26,15 @@ const CoachPlayerTableRow: React.FC<CoachPlayerTableRowProps> = ({ player, onCli
       className="hover:bg-gray-50 transition-colors cursor-pointer"
       onClick={() => onClick(player)}
     >
+      <td className="w-24 px-6 py-4 whitespace-nowrap">
+        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+          #{player.number || 'N/A'}
+        </span>
+      </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
-        <div className="h-10 w-10 flex-shrink-0">
-          {player.imageUrl ? (
+          <div className="h-10 w-10 flex-shrink-0">
+            {player.imageUrl ? (
               <img
                 src={player.imageUrl}
                 alt={`${player.name}'s profile`}

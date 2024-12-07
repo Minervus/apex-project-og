@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, ChevronDown, ChevronRight, Users, ClipboardCheck, ClipboardList, Star, ArrowRight, XCircle, SquareAsterisk } from 'lucide-react';
+import { Activity, ChevronDown, ChevronRight, Users, ClipboardCheck, ClipboardList, Star, ArrowRight, XCircle, SquareAsterisk, User } from 'lucide-react';
 import { usePlayers } from '../hooks/useFirestore';
 import CoachPlayerTableHeader from '../components/CoachPlayerTableHeader';
 import CoachPlayerTableRow from '../components/CoachPlayerTableRow';
@@ -42,7 +42,7 @@ const CoachDashboard = () => {
   const [assessments, setAssessments] = useState<Assessments>({});
   const [notes, setNotes] = useState<string>('');
   const [status, setStatus] = useState<'callback' | 'declined' | null>(null);
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' as const });
+  const [sortConfig, setSortConfig] = useState({ key: 'number', direction: 'asc' as const });
   const [currentPage, setCurrentPage] = useState(1);
   const playersPerPage = 15;
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -51,7 +51,24 @@ const CoachDashboard = () => {
 
   const { players, loading, error } = usePlayers(playersPerPage, currentPage);
 
-  const groupedPlayers = players.reduce((groups: { [key: string]: Player[] }, player) => {
+  // Add this sorting function before grouping the players
+  const sortedPlayers = [...players].sort((a, b) => {
+    const aValue = a[sortConfig.key as keyof Player];
+    const bValue = b[sortConfig.key as keyof Player];
+
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const compareResult = String(aValue).localeCompare(String(bValue));
+    return sortConfig.direction === 'asc' ? compareResult : -compareResult;
+  });
+
+  // Update the groupedPlayers to use sortedPlayers instead of players
+  const groupedPlayers = sortedPlayers.reduce((groups: { [key: string]: Player[] }, player) => {
     const ageGroup = player.ageGroup || 'Unassigned';
     if (!groups[ageGroup]) {
       groups[ageGroup] = [];
@@ -180,7 +197,7 @@ const CoachDashboard = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 w-full mx-auto space-y-6">
       {/* Dashboard Summary */}
       <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
         <div className="grid grid-cols-4 divide-x divide-gray-200">
@@ -244,61 +261,61 @@ const CoachDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         {/* Players List */}
-        <div>
-      <h2 className="text-xl font-semibold mb-4">Players</h2>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="flex flex-col h-[600px]">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <CoachPlayerTableHeader
-                sortConfig={sortConfig}
-                onSort={(key) => setSortConfig({
-                  key,
-                  direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-                })}
-              />
-              <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
-                {Object.entries(groupedPlayers).map(([ageGroup, groupPlayers]) => (
-                  <React.Fragment key={ageGroup}>
-                    {/* Age Group Header */}
-                    <tr 
-                      className="bg-gray-50 cursor-pointer hover:bg-gray-100"
-                      onClick={() => toggleGroup(ageGroup)}
-                    >
-                      <td colSpan={3} className="px-6 py-3">
-                        <div className="flex items-center">
-                          {expandedGroups.has(ageGroup) ? (
-                            <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
-                          ) : (
-                            <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
-                          )}
-                          <span className="font-medium text-gray-900">
-                            {ageGroup} ({groupPlayers.length} players)
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* Player Rows */}
-                    {expandedGroups.has(ageGroup) && groupPlayers.map((player) => (
-                      <CoachPlayerTableRow
-                        key={player.id}
-                        player={player}
-                        onClick={setSelectedPlayer}
-                      />
+        <div className="w-full">
+          <h2 className="text-xl font-semibold mb-4">Players</h2>
+          <div className="bg-white rounded-lg shadow overflow-hidden w-full">
+            <div className="flex flex-col h-[600px] w-full">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <CoachPlayerTableHeader
+                    sortConfig={sortConfig}
+                    onSort={(key) => setSortConfig({
+                      key,
+                      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+                    })}
+                  />
+                  <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
+                    {Object.entries(groupedPlayers).map(([ageGroup, groupPlayers]) => (
+                      <React.Fragment key={ageGroup}>
+                        {/* Age Group Header */}
+                        <tr 
+                          className="bg-gray-50 cursor-pointer hover:bg-gray-100"
+                          onClick={() => toggleGroup(ageGroup)}
+                        >
+                          <td colSpan={3} className="px-6 py-3">
+                            <div className="flex items-center">
+                              {expandedGroups.has(ageGroup) ? (
+                                <ChevronDown className="h-5 w-5 text-gray-500 mr-2" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-gray-500 mr-2" />
+                              )}
+                              <span className="font-medium text-gray-900">
+                                {ageGroup} ({groupPlayers.length} players)
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                        {/* Player Rows */}
+                        {expandedGroups.has(ageGroup) && groupPlayers.map((player) => (
+                          <CoachPlayerTableRow
+                            key={player.id}
+                            player={player}
+                            onClick={setSelectedPlayer}
+                          />
+                        ))}
+                      </React.Fragment>
                     ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
         {/* Assessment Form */}
-        <div>
+        <div className="w-full">
           <h2 className="text-xl font-semibold mb-4">Assessment Form</h2>
           <div className="bg-white rounded-lg shadow p-6">
             {selectedPlayer ? (
@@ -307,28 +324,28 @@ const CoachDashboard = () => {
                   <h3 className="font-medium text-gray-900 mb-2">Player Summary</h3>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="h-10 w-10 flex-shrink-0">
-          {selectedPlayer.imageUrl ? (
-              <img
-                src={selectedPlayer.imageUrl}
-                alt={`${selectedPlayer.name}'s profile`}
-                className="h-10 w-10 rounded-full object-cover"
-                onError={(e) => {
-                  // Fallback to User icon if image fails to load
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement?.classList.add('bg-indigo-100', 'flex', 'items-center', 'justify-center');
-                  const icon = document.createElement('div');
-                  icon.innerHTML = '<div class="h-5 w-5 text-indigo-600"><svg>...</svg></div>';
-                  e.currentTarget.parentElement?.appendChild(icon);
-                }}
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <User className="h-5 w-5 text-indigo-600" />
-              </div>
-            )}
-          </div>
+                    <div className="h-10 w-10 flex-shrink-0">
+                      {selectedPlayer.imageUrl ? (
+                        <img
+                          src={selectedPlayer.imageUrl}
+                          alt={`${selectedPlayer.name}'s profile`}
+                          className="h-10 w-10 rounded-full object-cover"
+                          onError={(e) => {
+                            // Fallback to User icon if image fails to load
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement?.classList.add('bg-indigo-100', 'flex', 'items-center', 'justify-center');
+                            const icon = document.createElement('div');
+                            icon.innerHTML = '<div class="h-5 w-5 text-indigo-600"><svg>...</svg></div>';
+                            e.currentTarget.parentElement?.appendChild(icon);
+                          }}
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                          <User className="h-5 w-5 text-indigo-600" />
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <span className="text-gray-500">Name:</span>
                       <span className="ml-2 text-gray-900">{selectedPlayer.name}</span>
@@ -340,6 +357,14 @@ const CoachDashboard = () => {
                     <div>
                       <span className="text-gray-500">Secondary Position:</span>
                       <span className="ml-2 text-gray-900">{selectedPlayer.secondaryPosition || 'None'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Previous Club:</span>
+                      <span className="ml-2 text-gray-900">{selectedPlayer.previousClub || 'None'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">School:</span>
+                      <span className="ml-2 text-gray-900">{selectedPlayer.school || 'None'}</span>
                     </div>
                     <div>
                       <span className="text-gray-500">Status:</span>

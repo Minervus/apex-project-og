@@ -23,6 +23,7 @@ const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({
 }) => {
   const headers = [
     { key: 'select', label: '', width: 'w-10' },
+    { key: 'number', label: '#', width: 'w-24' },
     { key: 'ageGroup', label: 'Age Group', width: 'w-32' },
     { key: 'name', label: 'Player', width: 'w-72' },
     { key: 'primaryPosition', label: 'Primary Position', width: 'w-40' },
@@ -54,15 +55,19 @@ const PlayerTableHeader: React.FC<PlayerTableHeaderProps> = ({
             scope="col"
             className={`${header.width} px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
               header.align || ''
-            }`}
+            } ${header.key !== 'details' ? 'cursor-pointer hover:bg-gray-100' : ''}`}
+            onClick={() => header.key !== 'details' && onSort(header.key)}
           >
-            {header.key === 'name' ? (
-              <div className="flex items-center">
+            <div className="flex items-center">
+              {header.key === 'name' ? (
                 <div className="ml-4">{header.label}</div>
-              </div>
-            ) : (
-              header.label
-            )}
+              ) : (
+                header.label
+              )}
+              {header.key !== 'details' && header.key !== 'select' && (
+                <ArrowUpDown className="h-4 w-4 ml-1" />
+              )}
+            </div>
           </th>
         ))}
       </tr>
